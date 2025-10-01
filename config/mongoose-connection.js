@@ -1,9 +1,11 @@
 const mongoose = require('mongoose');
+const debg = require('debug')("development:mongoose");      // they are use for connected is not show in terminal
+const config = require('config')
 
 mongoose
-.connect("mongodb://127.0.0.1:27017/kedarbags")
+.connect(`${config.get("MONGODB_URI")}/kedarbags`)
 .then(function(){
-    console.log("connected");
+    debg("connected");
 })
 .catch(function(err){
     console.log(err);
