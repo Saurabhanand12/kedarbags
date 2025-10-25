@@ -116,5 +116,9 @@ router.get('/profile',(req,res)=>{
     res.render("profile");
 });
 
+router.get('/checkout',(req,res)=>{
+  res.render("checkout");
+});
+
 
 module.exports = router; 
