@@ -21,12 +21,7 @@ router.get('/login',(req,res)=>{
 });
 router.post('/login',loginuser);
 
-router.get('/home',isloggedin,(req,res)=>{
-    res.render("home");
-});
-
 router.get('/logout',logout);
-
 
 router.get('/admin',(req,res)=>{
     res.render("admin");
@@ -38,6 +33,16 @@ router.get('/shop', isloggedin,async(req,res)=>{
     res.render("shop",{product,success});
 });
 
+
+router.get('/home', (req, res) => {
+    const products = [
+        { name: 'Leather Bag', image: '/images/bag1.jpg', price: 999 },
+        { name: 'Handbag', image: '/images/bag2.jpg', price: 799 },
+        { name: 'Backpack', image: '/images/bag3.jpg', price: 1299 }
+    ];
+
+    res.render('home', { products }); // <-- pass products here
+});
 
 router.get('/addtoproduct/:productid', isloggedin, async (req, res) => {
   try {
@@ -56,7 +61,32 @@ router.get('/addtoproduct/:productid', isloggedin, async (req, res) => {
     } else {
       req.flash("info", "Product already in cart");
     }
+    // res.redirect("/shop");
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Something went wrong");
     res.redirect("/shop");
+  }
+});
+
+router.get('/buy/:productid', isloggedin, async (req, res) => {
+  try {
+    const user = await usermodel.findOne({ email: req.user.email });
+    const product = await productmodel.findById(req.params.productid);
+    if (!product) {
+      req.flash("error", "Product not found");
+      return res.redirect("/shop");
+    }
+
+    // Avoid duplicates
+    if (!user.cart.includes(req.params.productid)) {
+      user.cart.push(req.params.productid);
+      await user.save();
+      req.flash("success", "Added to Cart");
+    } else {
+      req.flash("info", "Product already in cart");
+    }
+    res.redirect("/cart");
   } catch (err) {
     console.error(err);
     req.flash("error", "Something went wrong");
@@ -65,21 +95,36 @@ router.get('/addtoproduct/:productid', isloggedin, async (req, res) => {
 });
 
 router.get("/cart",isloggedin,async (req,res)=>{
-    let user = await usermodel.findOne({email:req.user.email}).populate("cart");
+  let user = await usermodel.findOne({email:req.user.email}).populate("cart");
 
-    if (!user || !user.cart || user.cart.length === 0) {
-      return res.render("cart", { user, bill: 0 });
-    }
-    let subtotal = 0;
-    user.cart.forEach(item => {
-    subtotal += (item.price || 0) * (item.qty || 1);
-    });
+  if (!user || !user.cart || user.cart.length === 0) {
+    return res.render("cart", { user, bill: 0 });
+  }
+  let subtotal = 0;
+  user.cart.forEach(item => {
+  subtotal += (item.price || 0) * (item.qty || 1);
+  });
 
-   let bill = subtotal + 20;
+let bill = subtotal + 20;
 
-   res.render("cart",{user,bill,empty: false,subtotal});
+res.render("cart",{user,bill,empty: false,subtotal});
 });
 
+router.get("/checkout",isloggedin,async (req,res)=>{
+  let user = await usermodel.findOne({email:req.user.email}).populate("cart");
+
+  if (!user || !user.cart || user.cart.length === 0) {
+    return res.render("cart", { user, bill: 0 });
+  }
+  let subtotal = 0;
+  user.cart.forEach(item => {
+  subtotal += (item.price || 0) * (item.qty || 1);
+  });
+
+let bill = subtotal + 20;
+
+res.render("checkout",{user,bill,empty: false,subtotal});
+});
 
 router.get("/bags/:id", async (req, res) => {
   try {
@@ -92,7 +137,6 @@ router.get("/bags/:id", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
 
 router.get("/removefromcart/:productid", isloggedin, async (req, res) => {
   try {
@@ -119,6 +163,5 @@ router.get('/profile',(req,res)=>{
 router.get('/checkout',(req,res)=>{
   res.render("checkout");
 });
-
 
 module.exports = router; 

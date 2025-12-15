@@ -29,6 +29,12 @@
                 </div>
             </div>
 
+             <% if (typeof success !== 'undefined' && success) { %>
+                <div class="alert alert-success text-center fw-bold" role="alert">
+                    <%= success %>
+                </div>
+            <% } %>
+
             <!-- Main Layout -->
             <div class="container-fluid">
                 <div class="row">
