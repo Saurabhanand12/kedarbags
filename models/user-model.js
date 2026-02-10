@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
+const dotenv=require('dotenv')
+dotenv.config()
 
-mongoose.connect("mongodb://127.0.0.1:27017/kedarbags");
+mongoose.connect(process.env.MONGO_URI);
 
 const userschema = mongoose.Schema({
     fullname :{

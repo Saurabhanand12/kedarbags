@@ -1,14 +1,18 @@
 const mongoose = require('mongoose');
 const debg = require('debug')("development:mongoose");      // they are use for connected is not show in terminal
-const config = require('config')
+const dotenv = require('dotenv')
 
-mongoose
-.connect(`${config.get("MONGODB_URI")}/kedarbags`)
-.then(function(){
-    debg("connected");
-})
-.catch(function(err){
-    console.log(err);
-});
- 
-module.exports = mongoose.connection;
+dotenv.config()
+
+const connectDb = async () => {
+    try {
+        await mongoose.connect(process.env.MONGO_URI)
+        console.log("Connected to MongoDB successfully")
+    } catch (error) {
+        console.error("Cant connect to MongoDB", error)
+    }
+}
+
+module.exports=connectDb
+
+

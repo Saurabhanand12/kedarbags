@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const path = require('path');
 
+const connectDb=require('./config/mongoose-connection')
+
 const usermodel = require('./models/user-model');
 const productmodel = require('./models/product-model')
 const db = require('./config/mongoose-connection')
@@ -39,9 +41,11 @@ app.use("/product",productRouter);
 const indexRouter = require('./routes/index');
 app.use('/', indexRouter);
 
-
+connectDb()
 
 app.listen(5002);
+
+module.exports = app;
 
 
 // <% products.forEach(function(product) { %>
